@@ -1,6 +1,6 @@
 # Study Pro — The Nigerian Study App (Primary 1 → SS3)
 
-[![CI](https://github.com/YOUR-USERNAME/study-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR-USERNAME/study-pro/actions)
+[![CI](https://github.com/merebari7-web/study-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/merebari7-web/study-pro/actions)
 [![Deploy on Netlify](https://img.shields.io/badge/Netlify-ready-00C7B7?logo=netlify&logoColor=white)](#-deploy-on-netlify-5-minutes)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f2b33d.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
@@ -21,7 +21,7 @@ git init
 git add .
 git commit -m "Study Pro"
 git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/study-pro.git
+git remote add origin https://github.com/merebari7-web/study-pro.git
 git push -u origin main
 ```
 
