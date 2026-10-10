@@ -1,0 +1,12 @@
+# Netlify configuration for Study Pro (Next.js 16 App Router + PostgreSQL)
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Official Netlify Next.js runtime (App Router, SSR, API routes, images)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

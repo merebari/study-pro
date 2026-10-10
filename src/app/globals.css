@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: var(--font-fraunces), "Georgia", serif;
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #0a1d15;
+  --color-forest: #0f2e21;
+  --color-pine: #1a4a34;
+  --color-moss: #2e6b4d;
+  --color-leaf: #2f9c68;
+  --color-sprout: #7fce9e;
+  --color-cream: #f6f1e4;
+  --color-paper: #fbf8ef;
+  --color-card: #f6f1e4;
+  --color-sand: #ece3cd;
+  --color-amber: #f2b33d;
+  --color-honey: #ffd98a;
+  --color-clay: #e45b3d;
+  --color-skyblue: #5ab3e8;
+}
+
+/* Dark mode: re-map the palette variables — utilities adapt automatically. */
+.dark {
+  --color-paper: #0a1712;
+  --color-card: #0f211a;
+  --color-cream: #f6f1e4;
+  --color-ink: #ece3c8;
+  --color-forest: #1b4a34;
+  --color-pine: #25644749;
+  --color-pine: #245c40;
+  --color-moss: #93d5b2;
+  --color-sand: #1a2f24;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+::selection {
+  background: var(--color-amber);
+  color: #0a1d15;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-card);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-pine);
+  border-radius: 999px;
+  border: 2px solid var(--color-card);
+}
+
+/* Grain / noise texture overlay */
+.noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.dotgrid {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-ink) 14%, transparent) 1.2px,
+    transparent 1.2px
+  );
+  background-size: 22px 22px;
+}
+
+.dotgrid-light {
+  background-image: radial-gradient(rgba(246, 241, 228, 0.16) 1.2px, transparent 1.2px);
+  background-size: 26px 26px;
+}
+
+/* Marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 36s linear infinite;
+}
+.animate-marquee-fast {
+  animation: marquee 22s linear infinite;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--rot, 0deg));
+  }
+}
+.animate-floaty {
+  animation: floaty 5.5s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 22s linear infinite;
+}
+
+/* Hand-drawn underline */
+.scribble {
+  position: relative;
+  white-space: nowrap;
+}
+.scribble > svg {
+  position: absolute;
+  left: -2%;
+  bottom: -0.18em;
+  width: 104%;
+  height: 0.32em;
+  overflow: visible;
+}
+
+/* Big outlined display text */
+.text-outline {
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-ink) 70%, transparent);
+  color: transparent;
+}
+.text-outline-cream {
+  -webkit-text-stroke: 1.5px rgba(246, 241, 228, 0.5);
+  color: transparent;
+}
+
+/* Focus rings */
+:focus-visible {
+  outline: 3px solid var(--color-amber);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Card hover lift */
+.lift {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lift:hover {
+  transform: translateY(-5px);
+}
+
+/* Topic row hover sweep */
+.sweep {
+  position: relative;
+  overflow: hidden;
+}
+.sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--sweep-color, #2f9c68) 10%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.sweep:hover::after {
+  transform: scaleX(1);
+}
+
+/* —————————————— PRINT: clean lesson-note output —————————————— */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  .print-clean {
+    border: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+  a {
+    color: #111 !important;
+    text-decoration: none !important;
+  }
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  .print-block {
+    break-inside: avoid;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Study Pro — Nigerian Study App",
+  "short_name": "Study Pro",
+  "description": "Lesson notes, quizzes, past questions, CBT practice and tools for Primary 1 to SS3.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf8ef",
+  "theme_color": "#0f2e21",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
