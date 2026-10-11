@@ -1,6 +1,10 @@
 # Study Pro — The Nigerian Study App (Primary 1 → SS3)
 
+> **🌐 LIVE: https://merebari.github.io/study-pro/** — deployed from `main` by GitHub Actions
+> (CI Postgres → seed → static prefetch → `next export` → GitHub Pages).
+
 [![CI](https://github.com/merebari/study-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/merebari/study-pro/actions)
+[![Pages](https://github.com/merebari/study-pro/actions/workflows/pages.yml/badge.svg)](https://github.com/merebari/study-pro/actions/workflows/pages.yml)
 [![Deploy on Netlify](https://img.shields.io/badge/Netlify-ready-00C7B7?logo=netlify&logoColor=white)](#-deploy-on-netlify-5-minutes)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f2b33d.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
