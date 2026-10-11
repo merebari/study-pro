@@ -6,6 +6,10 @@
 import { config } from "dotenv";
 config();
 
+// Prefetch must ALWAYS read from the database, even when the build env
+// exports NEXT_PUBLIC_STATIC_HOST=1 (the flag exists to shape the *output*).
+process.env.STATIC_HOST_DISABLED = "1";
+
 import { promises as fs } from "fs";
 import path from "path";
 import {

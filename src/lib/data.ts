@@ -13,7 +13,9 @@ import { promises as fs } from "fs";
 import path from "path";
 
 /* ── Static-host data: read prefetched JSON when there is no database ── */
-const STATIC_HOST = process.env.NEXT_PUBLIC_STATIC_HOST === "1";
+// Evaluated lazily: CI seed/prefetch scripts force disable it even when the
+// build environment exports NEXT_PUBLIC_STATIC_HOST=1.
+const isStaticHostServer = () => process.env.NEXT_PUBLIC_STATIC_HOST === "1" && process.env.STATIC_HOST_DISABLED !== "1";
 
 async function readJson<T>(name: string, fallback: T): Promise<T> {
   try {
@@ -25,7 +27,7 @@ async function readJson<T>(name: string, fallback: T): Promise<T> {
 }
 
 async function jsonOrDb<T>(name: string, dbFn: () => Promise<T>, fallback: T): Promise<T> {
-  if (!STATIC_HOST) return dbFn();
+  if (!isStaticHostServer()) return dbFn();
   return readJson(name, fallback);
 }
 
@@ -44,7 +46,7 @@ export async function getClasses() {
 }
 
 export async function getStats() {
-  if (STATIC_HOST) return readJson("stats.json", { topics: 0, subjects: 0, subjectRows: 0, classes: 0, questions: 0 });
+  if (isStaticHostServer()) return readJson("stats.json", { topics: 0, subjects: 0, subjectRows: 0, classes: 0, questions: 0 });
   const [t, s, c, q] = await Promise.all([
     db.select({ id: topics.id }).from(topics),
     db.select({ id: subjects.id }).from(subjects),
@@ -64,7 +66,7 @@ export async function getStats() {
 }
 
 export async function getClassesWithCounts() {
-  if (STATIC_HOST) return readJson("classes-with-counts.json", []);
+  if (isStaticHostServer()) return readJson("classes-with-counts.json", []);
   const cls = await getClasses();
   const bandRows = await getBands();
   const csRows = await db.select().from(classSubjects);
@@ -76,7 +78,7 @@ export async function getClassesWithCounts() {
 }
 
 export async function getClassBySlug(slug: string) {
-  if (STATIC_HOST) return readJson(`class/${slug}.json`, null).catch(() => null);
+  if (isStaticHostServer()) return readJson(`class/${slug}.json`, null).catch(() => null);
   const [cls] = await db.select().from(classes).where(eq(classes.slug, slug));
   if (!cls) return null;
   const [band] = await db.select().from(bands).where(eq(bands.id, cls.bandId));
@@ -128,7 +130,7 @@ export async function getClassBySlug(slug: string) {
 }
 
 export async function getSubjectBySlug(slug: string) {
-  if (STATIC_HOST) return readJson(`subject/${slug}.json`, null).catch(() => null);
+  if (isStaticHostServer()) return readJson(`subject/${slug}.json`, null).catch(() => null);
   const [subject] = await db.select().from(subjects).where(eq(subjects.slug, slug));
   if (!subject) return null;
   const [band] = await db.select().from(bands).where(eq(bands.id, subject.bandId));
@@ -183,7 +185,7 @@ export async function getSubjectBySlug(slug: string) {
 }
 
 export async function getTopicDetail(subjectSlug: string, topicSlug: string) {
-  if (STATIC_HOST) return readJson(`topic/${subjectSlug}__${topicSlug}.json`, null).catch(() => null);
+  if (isStaticHostServer()) return readJson(`topic/${subjectSlug}__${topicSlug}.json`, null).catch(() => null);
   const [subject] = await db.select().from(subjects).where(eq(subjects.slug, subjectSlug));
   if (!subject) return null;
   const [topic] = await db
@@ -234,7 +236,7 @@ export async function getTopicDetail(subjectSlug: string, topicSlug: string) {
 }
 
 export async function getSubjectsIndex() {
-  if (STATIC_HOST) return readJson("subjects-index.json", []);
+  if (isStaticHostServer()) return readJson("subjects-index.json", []);
   const subjRows = await db.select().from(subjects);
   const bandRows = await getBands();
   const classRows = await getClasses();
@@ -350,7 +352,7 @@ export async function getQuizQuestions(filters: {
 }
 
 export async function getPracticeCatalog() {
-  if (STATIC_HOST) return readJson("catalog.json", []);
+  if (isStaticHostServer()) return readJson("catalog.json", []);
   const classRows = await getClasses();
   const qRows = await db
     .select({ subjectId: questions.subjectId, classId: questions.classId })
@@ -384,7 +386,7 @@ export async function getPracticeCatalog() {
 }
 
 export async function getPastQuestions() {
-  if (STATIC_HOST) return readJson("past-questions.json", []);
+  if (isStaticHostServer()) return readJson("past-questions.json", []);
   const rows = await db
     .select()
     .from(questions)
