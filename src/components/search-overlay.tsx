@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, BookOpen, GraduationCap, Loader2, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BASE_PATH, isStaticHost } from "@/lib/fetch";
+
+type SearchIndex = {
+  subjects: Array<{ id: number; name: string; slug: string }>;
+  topics: Array<{ title: string; slug: string; subjectSlug: string; subjectName: string }>;
+  classes: Array<{ slug: string; name: string; tagline: string }>;
+};
+let cachedIndex: SearchIndex | null = null;
 
 type SearchResult = {
   subjects: Array<{ id: number; name: string; slug: string; color: string; blurb: string }>;
@@ -48,8 +56,31 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
     const t = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
-        if (res.ok) setResult(await res.json());
+        if (isStaticHost()) {
+          if (!cachedIndex) {
+            const res = await fetch(`${BASE_PATH}/json/search-index.json`);
+            cachedIndex = await res.json();
+          }
+          const q2 = query.trim().toLowerCase();
+          const idx = cachedIndex!;
+          setResult({
+            subjects: idx.subjects
+              .filter((s) => s.name.toLowerCase().includes(q2))
+              .slice(0, 6)
+              .map((s) => ({ ...s, color: "#2f9c68", blurb: "" })),
+            topics: idx.topics
+              .filter((t2) => t2.title.toLowerCase().includes(q2))
+              .slice(0, 12)
+              .map((t2) => ({ id: 0, slug: t2.slug, title: t2.title, subject: { slug: t2.subjectSlug, name: t2.subjectName } })),
+            classes: idx.classes
+              .filter((c) => c.name.toLowerCase().includes(q2) || c.tagline.toLowerCase().includes(q2))
+              .slice(0, 4)
+              .map((c) => ({ id: 0, ...c })),
+          });
+        } else {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
+          if (res.ok) setResult(await res.json());
+        }
       } finally {
         setLoading(false);
       }

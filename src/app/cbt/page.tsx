@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { recordQuizResult } from "@/lib/study-store";
+import { fetchCatalog, fetchQuizQuestions } from "@/lib/fetch";
 import { cn } from "@/lib/utils";
 
 type CatalogClass = {
@@ -61,9 +62,8 @@ export default function CbtPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    fetch("/api/catalog")
-      .then((r) => r.json())
-      .then((d) => setCatalog(d.catalog ?? []))
+    fetchCatalog()
+      .then((list) => setCatalog(list))
       .catch(() => {});
   }, []);
 
@@ -100,9 +100,8 @@ export default function CbtPage() {
       const bundles = await Promise.all(
         picked.map(async (sid) => {
           const name = currentClass.subjects.find((s) => s.id === sid)?.name ?? "Subject";
-          const res = await fetch(`/api/quiz?subjectId=${sid}&limit=${QUESTIONS_PER_SUBJECT}`);
-          const d = await res.json();
-          return (d.questions ?? []).map((q: Omit<CbtQuestion, "subject">) => ({ ...q, subject: name }));
+          const list = await fetchQuizQuestions({ subjectId: sid, limit: QUESTIONS_PER_SUBJECT });
+          return (list as Omit<CbtQuestion, "subject">[]).map((q) => ({ ...q, subject: name }));
         })
       );
       const all = bundles.flat();

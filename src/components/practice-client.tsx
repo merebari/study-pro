@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { recordQuizResult } from "@/lib/study-store";
+import { fetchQuizQuestions } from "@/lib/fetch";
 import { useEffect } from "react";
 
 type CatalogClass = {
@@ -88,18 +89,18 @@ export function PracticeClient({
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
-      if (subjectId) params.set("subjectId", String(subjectId));
-      if (!subjectId && classId) params.set("classId", String(classId));
-      params.set("limit", String(count));
-      const res = await fetch(`/api/quiz?${params.toString()}`);
-      const data: { questions: ApiQuestion[] } = await res.json();
-      if (!data.questions.length) {
+      const list = (await fetchQuizQuestions({
+        subjectId: subjectId ?? undefined,
+        classId: !subjectId && classId ? classId : undefined,
+        limit: count,
+      })) as ApiQuestion[];
+      if (!list.length) {
         setError("No questions available for that selection yet — try another class or subject.");
+        setLoading(false);
         return;
       }
       recordedRef.done = false;
-      setQuestions(data.questions);
+      setQuestions(list);
       setIndex(0);
       setPicked(null);
       setAnswers([]);

@@ -1,0 +1,81 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# GITHUB_TOKEN permissions required by Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app_db
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/app_db
+      NEXT_PUBLIC_STATIC_HOST: "1"
+      NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Prepare static build (no API routes, fully static pages)
+        run: |
+          mv src/app/api /tmp/api-disabled
+          grep -rl 'export const dynamic = "force-dynamic"' src/app \
+            | xargs -r sed -i 's/export const dynamic = "force-dynamic"/export const dynamic = "force-static"/'
+
+      - name: Create DB schema
+        run: npx drizzle-kit push --force
+
+      - name: Seed curriculum into CI Postgres
+        run: npx tsx scripts/seed.ts
+
+      - name: Prefetch curriculum → public/json
+        run: npx tsx scripts/prefetch-static.ts
+
+      - name: Build static export (out/)
+        run: npm run build
+
+      - name: Mark Pages (.nojekyll for _next assets)
+        run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

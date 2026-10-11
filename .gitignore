@@ -12,6 +12,10 @@ next-env.d.ts
 # netlify
 /.netlify
 
+# static export artifacts (generated in CI for GitHub Pages)
+/out
+/public/json
+
 # environment variables — never commit secrets
 .env
 .env*.local

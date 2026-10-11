@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { awardXp } from "@/lib/study-store";
+import { fetchCatalog, fetchFlashcards } from "@/lib/fetch";
 import { cn } from "@/lib/utils";
 
 type CatalogClass = {
@@ -37,13 +38,8 @@ export default function FlashcardsPage() {
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    fetch("/api/catalog")
-      .then((r) => r.json())
-      .then((d) => {
-        setCatalog(d.catalog ?? []);
-        // Flashcards work for every subject with key terms, not only quiz subjects:
-        // the catalog only includes subjects with questions, so also fetch full list via search-free route
-      })
+    fetchCatalog()
+      .then((list) => setCatalog(list))
       .catch(() => {});
   }, []);
 
@@ -61,11 +57,8 @@ export default function FlashcardsPage() {
     if (!subjectId) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({ subject: String(subjectId) });
-      if (classId) params.set("class", String(classId));
-      const res = await fetch(`/api/flashcards?${params.toString()}`);
-      const d = await res.json();
-      setDeck(d.cards ?? []);
+      const cards = (await fetchFlashcards(subjectId, classId ?? undefined)) as Card[];
+      setDeck(cards);
       setCursor(0);
       setFlipped(false);
       setKnown(new Set());
