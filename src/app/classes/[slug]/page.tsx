@@ -4,10 +4,15 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Trophy } from "lucide-react";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion";
 import { SubjectCard } from "@/components/cards";
-import { getClassBySlug, getClassesWithCounts } from "@/lib/data";
+import { getClassBySlug, getClasses, getClassesWithCounts } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  const cls = await getClasses();
+  return cls.map((c) => ({ slug: c.slug }));
+}
 
 export async function generateMetadata({
   params,

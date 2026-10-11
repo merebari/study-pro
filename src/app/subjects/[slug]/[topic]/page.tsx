@@ -20,11 +20,31 @@ import { SubjectIcon } from "@/components/icon-map";
 import { TopicQuiz } from "@/components/topic-quiz";
 import { MarkComplete } from "@/components/mark-complete";
 import { BookmarkButton, PrintButton } from "@/components/save-buttons";
-import { getTopicDetail } from "@/lib/data";
+import { getTopicDetail, getSubjectsIndex, getSubjectBySlug } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 const TERM_NAMES: Record<number, string> = { 1: "First Term", 2: "Second Term", 3: "Third Term" };
+
+export async function generateStaticParams() {
+  const index = await getSubjectsIndex();
+  const out: Array<{ slug: string; topic: string }> = [];
+  for (const entry of index) {
+    for (const row of entry.rows) {
+      const detail = await getSubjectBySlug(row.slug);
+      if (!detail) continue;
+      const seen = new Set<string>();
+      for (const perClass of detail.topicsPerClass) {
+        for (const t of perClass.topics) {
+          if (seen.has(t.topic.slug)) continue;
+          seen.add(t.topic.slug);
+          out.push({ slug: row.slug, topic: t.topic.slug });
+        }
+      }
+    }
+  }
+  return out;
+}
 
 export async function generateMetadata({
   params,

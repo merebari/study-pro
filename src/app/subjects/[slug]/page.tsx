@@ -5,9 +5,14 @@ import { ChevronRight, ClipboardList } from "lucide-react";
 import { Reveal } from "@/components/motion";
 import { SubjectIcon } from "@/components/icon-map";
 import { TopicTabs } from "@/components/topic-tabs";
-import { getSubjectBySlug } from "@/lib/data";
+import { getSubjectBySlug, getSubjectsIndex } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  const index = await getSubjectsIndex();
+  return index.flatMap((e) => e.rows.map((r) => ({ slug: r.slug })));
+}
 
 export async function generateMetadata({
   params,
